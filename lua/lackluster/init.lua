@@ -11,20 +11,37 @@
 --  Maintainer: Duncan Marsh (slugbyte@slugbyte.com)
 --  Repository: https://github.com/slugbyte/lackluster.nvim
 local dev = require("lackluster.dev")
-local color = require("lackluster.color")
-local color_special = require("lackluster.color-special")
 local create_theme = require("lackluster.create-theme")
 local tweak = require("lackluster.tweak")
 local highlight = require("lackluster.highlight")
 
 -- NOTE: theme will get overwriten if user calls setup()
-local theme = create_theme(color, color_special)
-
+local theme = nil
+local variant = "dark"
 local M = {
-    color = color,
-    color_special = color_special,
+    color = nil,
+    color_special = nil,
     dev = dev,
 }
+
+local function update_color_schemes()
+
+	local color = nil
+	local color_special = nil
+	if vim.o.background == "light" then
+		color = require("lackluster.color-light")
+		color_special = require("lackluster.color-special-light")
+	else
+		color = require("lackluster.color")
+		color_special = require("lackluster.color_special")
+	end
+
+	theme = create_theme(color, color_special)
+	M.color = color
+	M.color_special = color_special
+end
+
+update_color_schemes()
 
 ---@class LacklusterConfigTweakSyntax
 ---@field string ?string
@@ -198,16 +215,15 @@ M.setup = function(config)
     config = vim.tbl_deep_extend("keep", config, default_config)
     USER_CONFIG = config
     -- update the colors and regenerate the theme based on colors
-    tweak.color(config.tweak_color, color)
-    theme = create_theme(color, color_special)
+    tweak.color(config.tweak_color, M.color)
+    theme = create_theme(M.color, M.color_special)
     -- tweak theme
     tweak.background(config.tweak_background, theme)
     tweak.syntax(config.tweak_syntax, theme)
-    tweak.ui(config.tweak_ui, theme, color)
+    tweak.ui(config.tweak_ui, theme, M.color)
 end
 
 local load_variant = function(opt)
-    theme.syntax = theme.syntax_default
     vim.o.termguicolors = true
     vim.g.colors_name = "lackluster"
 
@@ -239,7 +255,7 @@ end
 ---@param config LacklusterConfig
 local highlight_apply = function(config)
     local dedup_set = {}
-    local highlight_group_list = highlight(theme, color)
+    local highlight_group_list = highlight(theme, M.color)
 
     for _, highlight_group in ipairs(highlight_group_list) do
         local highlight_spec_list = highlight_group.highlight
@@ -267,6 +283,12 @@ end
 
 -- apply the colorscheme
 M.load = function(opt)
+		-- has variant changed ? recreate the theme	
+		if variant ~= vim.o.background then
+			variant = vim.o.background
+			update_color_schemes()
+		end
+
     opt = opt or {}
 
     if USER_CONFIG == nil then
