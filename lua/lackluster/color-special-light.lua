@@ -4,13 +4,13 @@
 
 ---@class LacklusterColorSpecial
 return {
-    main_background = "#FFFFFF",
-    menu_background = "#191919",
-    popup_background = "#1A1A1A",
-    statusline = "#242424",
-    comment = "#3A3A3A",
-    exception = "#505050",
-    keyword = "#666666",
-    param = "#8E8E8E",
-    whitespace = "#202020",
+    main_background = "#F0F0F0",
+    menu_background = "#E6E6E6",
+    popup_background = "#E5E5E5",
+    statusline = "#DBDBDB",
+    comment = "#C5C5C5",
+    exception = "#595959",
+    keyword = "#595959",
+    param = "#717171",
+    whitespace = "#EFEFEF",
 }

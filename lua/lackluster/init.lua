@@ -15,17 +15,24 @@ local create_theme = require("lackluster.create-theme")
 local tweak = require("lackluster.tweak")
 local highlight = require("lackluster.highlight")
 
--- NOTE: theme will get overwriten if user calls setup()
-local theme = nil
-local variant = "dark"
-local M = {
-    color = nil,
-    color_special = nil,
-    dev = dev,
-}
+local function get_variant_color()
+	if vim.o.background == "light" then
+		return require("lackluster.color-light")
+	else
+		return require("lackluster.color")
+	end
+end
 
-local function update_color_schemes()
+local function get_variant_color_special()
+	if vim.o.background == "light" then
+		return require("lackluster.color-special-light")
+	else
+		return require("lackluster.color-special")
+	end
+end
 
+-- Create theme with respect to background option
+local function create_variant_theme(current_theme)
 	local color = nil
 	local color_special = nil
 	if vim.o.background == "light" then
@@ -33,15 +40,29 @@ local function update_color_schemes()
 		color_special = require("lackluster.color-special-light")
 	else
 		color = require("lackluster.color")
-		color_special = require("lackluster.color_special")
+		color_special = require("lackluster.color-special")
 	end
 
-	theme = create_theme(color, color_special)
-	M.color = color
-	M.color_special = color_special
+	local theme = create_theme(color, color_special)
+
+	-- copy the user tweaks otherwise they are lost !
+	if current_theme ~= nil then
+		theme.syntax_tweak = current_theme.syntax_tweak
+	end
+
+	return theme
 end
 
-update_color_schemes()
+-- NOTE: theme will get overwriten if user calls setup()
+local theme = create_variant_theme()
+local M = {
+    color = get_variant_color(),
+    color_special = get_variant_color_special(),
+    dev = dev,
+}
+
+-- keep track of the current variant to avoid reloading theme everytime
+local variant = vim.o.background
 
 ---@class LacklusterConfigTweakSyntax
 ---@field string ?string
@@ -224,6 +245,7 @@ M.setup = function(config)
 end
 
 local load_variant = function(opt)
+		theme.syntax = theme.syntax_default
     vim.o.termguicolors = true
     vim.g.colors_name = "lackluster"
 
@@ -286,7 +308,9 @@ M.load = function(opt)
 		-- has variant changed ? recreate the theme	
 		if variant ~= vim.o.background then
 			variant = vim.o.background
-			update_color_schemes()
+			theme = create_variant_theme(theme)
+			M.color = get_variant_color()
+			M.color_special = get_variant_color_special()
 		end
 
     opt = opt or {}
