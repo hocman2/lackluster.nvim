@@ -217,8 +217,8 @@ M.setup = function(config)
     tweak.color(config.tweak_color, M.color)
     theme = create_theme(M.color, M.color_special)
     -- tweak theme
-    tweak.background(config.tweak_background, theme)
-    tweak.syntax(config.tweak_syntax, theme)
+    tweak.background(config.tweak_background, theme, M.color, M.color_special)
+    tweak.syntax(config.tweak_syntax, theme, M.color, M.color_special)
     tweak.ui(config.tweak_ui, theme, M.color)
 end
 
@@ -300,6 +300,9 @@ M.load = function(opt)
 			local new_theme = create_theme(M.color, M.color_special)
 			new_theme.syntax_tweak = theme.syntax_tweak;
 			theme = new_theme;
+
+			tweak.background(USER_CONFIG.tweak_background, theme, M.color, M.color_special)
+			tweak.syntax(USER_CONFIG.tweak_syntax, theme, M.color, M.color_special)
 		end
 
     load_variant(opt)

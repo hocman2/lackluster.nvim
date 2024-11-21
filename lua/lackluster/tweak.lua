@@ -11,6 +11,15 @@ local tweak_background_keys = {
     "telescope",
 }
 
+local get_hex_from_color_name = function(value, color, color_spcial)
+		if color[value] ~= nil then
+			return color[value]
+		elseif color_spcial[value] ~= nil then
+			return color_spcial[value]
+		else return nil
+		end
+end
+
 ---modify the colors base don setup's config.tweak_color
 M.color = function(tweak_color, color)
     for color_name, color_value in pairs(tweak_color) do
@@ -28,10 +37,14 @@ M.color = function(tweak_color, color)
 end
 
 ---modify the theme based on setup's config.tweak_background
-M.background = function(tweak_background, theme)
-    for _, key in ipairs(tweak_background_keys) do
+M.background = function(tweak_background, theme, color, color_special)
+    for _, key in pairs(tweak_background_keys) do
         local value = tweak_background[key]
         if value and (value ~= "default") then
+						-- If the value happens to be a color key, convert it to it's hex value
+						local hex = get_hex_from_color_name(value, color, color_special)
+						if hex ~= nil then value = hex end
+
             if validate.hexcode_or_none(value) then
                 if key == "telescope" then
                     theme.plugin_telescope["bg_normal"] = value
@@ -60,10 +73,14 @@ local tweak_syntax_keys = {
 ---modify the theme based on setup's config.tweak_syntax
 ---@param tweak_syntax LacklusterConfigTweakSyntax
 ---@param theme LacklusterTheme
-M.syntax = function(tweak_syntax, theme)
+M.syntax = function(tweak_syntax, theme, color, color_special)
     for _, key in ipairs(tweak_syntax_keys) do
         local value = tweak_syntax[key]
         if value and (value ~= "default") then
+						-- If the value happens to be a color key, convert it to it's hex value
+						local hex = get_hex_from_color_name(value, color, color_special)
+						if hex ~= nil then value = hex end
+
             if validate.hexcode_or_none(value) then
                 theme.syntax_tweak[key] = value
                 if key == "type" then
