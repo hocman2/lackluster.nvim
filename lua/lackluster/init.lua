@@ -297,9 +297,7 @@ M.load = function(opt)
 			-- re-apply color tweaks to the changed palette
 			tweak.color(USER_CONFIG.tweak_color, M.color)
 			-- create new theme and preserve syntax tweaks !
-			local new_theme = create_theme(M.color, M.color_special)
-			new_theme.syntax_tweak = theme.syntax_tweak;
-			theme = new_theme;
+			theme = create_theme(M.color, M.color_special)
 
 			tweak.background(USER_CONFIG.tweak_background, theme, M.color, M.color_special)
 			tweak.syntax(USER_CONFIG.tweak_syntax, theme, M.color, M.color_special)
