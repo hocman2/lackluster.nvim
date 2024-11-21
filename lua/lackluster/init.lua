@@ -223,7 +223,7 @@ M.setup = function(config)
 end
 
 local load_variant = function(opt)
-		theme.syntax = theme.syntax_default
+    theme.syntax = theme.syntax_default
     vim.o.termguicolors = true
     vim.g.colors_name = "lackluster"
 
@@ -289,19 +289,19 @@ M.load = function(opt)
         USER_CONFIG = vim.tbl_deep_extend("force", {}, default_config)
     end
 
-		-- has variant changed ? recreate the theme	
-		if variant ~= vim.o.background then
-			variant = vim.o.background
-			M.color = get_variant_color()
-			M.color_special = get_variant_color_special()
-			-- re-apply color tweaks to the changed palette
-			tweak.color(USER_CONFIG.tweak_color, M.color)
-			-- create new theme and preserve syntax tweaks !
-			theme = create_theme(M.color, M.color_special)
+    -- has variant changed ? recreate the theme	
+    if variant ~= vim.o.background then
+        variant = vim.o.background
+        M.color = get_variant_color()
+        M.color_special = get_variant_color_special()
+        -- re-apply color tweaks to the changed palette
+        tweak.color(USER_CONFIG.tweak_color, M.color)
+        -- create new theme and preserve syntax tweaks !
+        theme = create_theme(M.color, M.color_special)
 
-			tweak.background(USER_CONFIG.tweak_background, theme, M.color, M.color_special)
-			tweak.syntax(USER_CONFIG.tweak_syntax, theme, M.color, M.color_special)
-		end
+        tweak.background(USER_CONFIG.tweak_background, theme, M.color, M.color_special)
+        tweak.syntax(USER_CONFIG.tweak_syntax, theme, M.color, M.color_special)
+    end
 
     load_variant(opt)
     highlight_apply(USER_CONFIG)
