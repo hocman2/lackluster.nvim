@@ -31,35 +31,13 @@ local function get_variant_color_special()
 	end
 end
 
--- Create theme with respect to background option
-local function create_variant_theme(current_theme)
-	local color = nil
-	local color_special = nil
-	if vim.o.background == "light" then
-		color = require("lackluster.color-light")
-		color_special = require("lackluster.color-special-light")
-	else
-		color = require("lackluster.color")
-		color_special = require("lackluster.color-special")
-	end
-
-	local theme = create_theme(color, color_special)
-
-	-- copy the user tweaks otherwise they are lost !
-	if current_theme ~= nil then
-		theme.syntax_tweak = current_theme.syntax_tweak
-	end
-
-	return theme
-end
-
 -- NOTE: theme will get overwriten if user calls setup()
-local theme = create_variant_theme()
 local M = {
     color = get_variant_color(),
     color_special = get_variant_color_special(),
     dev = dev,
 }
+local theme = create_theme(M.color, M.color_special)
 
 -- keep track of the current variant to avoid reloading theme everytime
 local variant = vim.o.background
@@ -131,7 +109,7 @@ local variant = vim.o.background
 
 ---@class LacklusterConfig
 ---@field tweak_ui ?LacklusterConfigTweakUI
----@field tweak_pallet ?LacklusterConfigTweakColor
+---@field tweak_color ?LacklusterConfigTweakColor
 ---@field tweak_syntax ?LacklusterConfigTweakSyntax
 ---@field tweak_background ?LacklusterConfigTweakBackground
 ---@field tweak_highlight ?{[string]:vim.api.keyset.highlight}
@@ -305,19 +283,24 @@ end
 
 -- apply the colorscheme
 M.load = function(opt)
-		-- has variant changed ? recreate the theme	
-		if variant ~= vim.o.background then
-			variant = vim.o.background
-			theme = create_variant_theme(theme)
-			M.color = get_variant_color()
-			M.color_special = get_variant_color_special()
-		end
-
     opt = opt or {}
 
     if USER_CONFIG == nil then
         USER_CONFIG = vim.tbl_deep_extend("force", {}, default_config)
     end
+
+		-- has variant changed ? recreate the theme	
+		if variant ~= vim.o.background then
+			variant = vim.o.background
+			M.color = get_variant_color()
+			M.color_special = get_variant_color_special()
+			-- re-apply color tweaks to the changed palette
+			tweak.color(USER_CONFIG.tweak_color, M.color)
+			-- create new theme and preserve syntax tweaks !
+			local new_theme = create_theme(M.color, M.color_special)
+			new_theme.syntax_tweak = theme.syntax_tweak;
+			theme = new_theme;
+		end
 
     load_variant(opt)
     highlight_apply(USER_CONFIG)
